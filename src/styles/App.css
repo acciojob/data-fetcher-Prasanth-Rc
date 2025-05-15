@@ -1,1 +1,21 @@
+.data-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
+.loading, .error, .no-data {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+}
+
+.product-list {
+  list-style: none;
+  padding: 0;
+}
+
+.product-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
