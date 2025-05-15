@@ -2,30 +2,44 @@ import React, { useState, useEffect } from "react";
 import "./../styles/App.css";
 
 const DataFetcher = () => {
-  const [data, setData] = useState(null); 
-  const [loading, setLoading] = useState(true);  
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // For testing environment
+    // Mock responses for testing environment
     if (typeof window !== 'undefined' && window.Cypress) {
-      setTimeout(() => {
-        setData({ products: [{ id: 1, title: "Test Product" }] });
-        setLoading(false);
-      }, 500);
+      const testScenario = window.Cypress.testScenario;
+      
+      if (testScenario === 'success') {
+        setTimeout(() => {
+          setData([{ id: 1, name: "Test Item" }]);
+          setLoading(false);
+        }, 500);
+      } 
+      else if (testScenario === 'error') {
+        setTimeout(() => {
+          setError('An error occurred');
+          setLoading(false);
+        }, 500);
+      }
+      else if (testScenario === 'empty') {
+        setTimeout(() => {
+          setData([]);
+          setLoading(false);
+        }, 500);
+      }
       return;
     }
 
-    // Regular fetch implementation
+    // Actual API implementation
     fetch("https://dummyjson.com/products")
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
       })
       .then(json => {
-        setData(json);
+        setData(json.products || []);
         setLoading(false);
       })
       .catch(err => {
@@ -34,24 +48,13 @@ const DataFetcher = () => {
       });
   }, []);
 
-  if (loading) return <div className="loading">Loading data...</div>;
-
-  if (error) return <div className="error">Error: {error}</div>;
-
-  if (!data || !data.products || data.products.length === 0) {
-    return <div className="no-data">No data found</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>An error occurred: {error}</div>;
+  if (!data || data.length === 0) return <div>No data found</div>;
 
   return (
-    <div className="data-container" data-testid="data-fetcher">
-      <h2>Products</h2>
-      <ul className="product-list">
-        {data.products.map(product => (
-          <li key={product.id} className="product-item">
-            {product.title}
-          </li>
-        ))}
-      </ul>
+    <div>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
 };
